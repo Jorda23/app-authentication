@@ -1,6 +1,9 @@
-import { userModel } from "../models/user.model.js"; 
+import { userModel } from "../models/user.model.js";
 import { permissionModel } from "../models/permission.model.js";
 import jwt from "jsonwebtoken";
+
+const JWT_SECRET_KEY = "645324853478";
+const EXPIRATION_MINUTES = "30m";
 
 export const privateArea = async (req, res) => {
   try {
@@ -13,7 +16,7 @@ export const privateArea = async (req, res) => {
         .end();
     }
 
-    const decodedToken = jwt.verify(token, "676964955656985689"); // Verificar y decodificar el token
+    const decodedToken = jwt.verify(token, JWT_SECRET_KEY); // Verificar y decodificar el token
 
     const user = await userModel.findOne({
       where: { userName: decodedToken.userName },
@@ -24,7 +27,7 @@ export const privateArea = async (req, res) => {
     }
 
     const permission = await permissionModel.findOne({
-      where: { permissionName: "private" }, // Cambiar "private" por el nombre del permiso privado deseado
+      where: { permissionName: "private" }, //Este es el nombre del permiso que tiene acceso
     });
 
     if (!permission) {
@@ -67,15 +70,15 @@ export const authToken = async (req, res) => {
       password: user.password,
     };
 
-    const accessToken = jwt.sign(payload, "676964955656985689", {
-      expiresIn: "40m",
+    const accessToken = jwt.sign(payload, JWT_SECRET_KEY, {
+      expiresIn: EXPIRATION_MINUTES,
     });
 
     res
       .json({
         access_token: accessToken,
         token_type: "Bearer",
-        expires_in: "40m",
+        expires_in: EXPIRATION_MINUTES,
       })
       .end();
   } catch (error) {
